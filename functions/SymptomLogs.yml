@@ -1,4 +1,4 @@
-// Import the DynamoDB client from AWS SDK
+
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 // Import helper functions to work with DynamoDB in a simpler way
 import {
