@@ -38,7 +38,7 @@ jobs:
         zip -r ../symptom-consumer.zip .
         cd ..
 
-    - name: Create Environment Lambda (if not exists)
+    - name: Create Environment Lambda 
       run: |
         set +e
         aws lambda get-function --function-name EnvironmentLambdaIac
@@ -64,7 +64,7 @@ jobs:
             --zip-file fileb://symptom-logs.zip
         fi
 
-    - name: Create Symptom Consumer Lambda (if not exists)
+    - name: Create Symptom Consumer Lambda 
       run: |
         set +e
         aws lambda get-function --function-name SymptomConsumerLambdaIac
