@@ -11,87 +11,56 @@ jobs:
 
     steps:
     - name: Checkout repo
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v2
+      uses: aws-actions/configure-aws-credentials@v3
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: eu-north-1
 
-    - name: Zip Environment Lambda
-      run: |
-        cd environment
-        zip -r ../environment.zip .
-        cd ..
+    - name: Install zip
+      run: sudo apt-get update && sudo apt-get install -y zip..
 
-    - name: Zip Symptom Logs Lambda
+# ---------- EnvironmentDataFunction_Iac ----------
+    - name: Package environment lambda
       run: |
-        cd symptom-logs
-        zip -r ../symptom-logs.zip .
-        cd ..
+          cd environment
+          zip -r ../environment.zip .
+          cd ..
 
-    - name: Zip Symptom Consumer Lambda
+    - name: Deploy environment-data lambda
       run: |
-        cd symptom-consumer
-        zip -r ../symptom-consumer.zip .
-        cd ..
-
-    - name: Create Environment Lambda 
-      run: |
-        set +e
-        aws lambda get-function --function-name EnvironmentLambdaIac
-        if [ $? -ne 0 ]; then
-          aws lambda create-function \
-            --function-name EnvironmentLambdaIac \
-            --runtime nodejs20.x \
-            --role ${{ secrets.LAMBDA_ROLE_ARN }} \
-            --handler index.handler \
+          aws lambda update-function-code \
+            --function-name EnvironmentDataFunction_Iac \
             --zip-file fileb://environment.zip
-        fi
 
-    - name: Create Symptom Logs Lambda 
+    # ---------- SymptomLogsFunction_Iac ----------
+    - name: Package symptom-logs lambda
       run: |
-        set +e
-        aws lambda get-function --function-name SymptomLogsLambdaIac
-        if [ $? -ne 0 ]; then
-          aws lambda create-function \
-            --function-name SymptomLogsLambdaIac \
-            --runtime nodejs20.x \
-            --role ${{ secrets.LAMBDA_ROLE_ARN }} \
-            --handler index.handler \
+          cd symptom-logs
+          zip -r ../symptom-logs.zip .
+          cd ..
+
+    - name: Deploy symptom-logs lambda
+      run: |
+          aws lambda update-function-code \
+            --function-name SymptomLogsFunction_Iac \
             --zip-file fileb://symptom-logs.zip
-        fi
 
-    - name: Create Symptom Consumer Lambda 
+      # ---------- SymptomConsumerFunction_Iac ----------
+    - name: Package symptom-consumer lambda
       run: |
-        set +e
-        aws lambda get-function --function-name SymptomConsumerLambdaIac
-        if [ $? -ne 0 ]; then
-          aws lambda create-function \
-            --function-name SymptomConsumerLambdaIac \
-            --runtime nodejs20.x \
-            --role ${{ secrets.LAMBDA_ROLE_ARN }} \
-            --handler index.handler \
+          cd symptom-consumer
+          zip -r ../symptom-consumer.zip .
+          cd ..
+
+    - name: Deploy symptom-consumer lambda
+      run: |
+          aws lambda update-function-code \
+            --function-name SymptomConsumerFunction_Iac \
             --zip-file fileb://symptom-consumer.zip
-        fi
-
-    # Update code every push
-    - name: Update Environment Lambda code
-      run: |
-        aws lambda update-function-code \
-          --function-name EnvironmentLambdaIac \
-          --zip-file fileb://environment.zip
-
-    - name: Update Symptom Logs Lambda code
-      run: |
-        aws lambda update-function-code \
-          --function-name SymptomLogsLambdaIac \
-          --zip-file fileb://symptom-logs.zip
-
-    - name: Update Symptom Consumer Lambda code
-      run: |
-        aws lambda update-function-code \
+          aws lambda update-function-code \
           --function-name SymptomConsumerLambdaIac \
           --zip-file fileb://symptom-consumer.zip
