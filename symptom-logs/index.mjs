@@ -16,7 +16,7 @@ const client = new DynamoDBClient({});
 // Create a document client from the regular client 
 const dynamo = DynamoDBDocumentClient.from(client);
 // Set the name of the table
-const tableName = "SymptomLogs";
+const tableName = process.env.SYMPTOM_TABLE;
 
 //  NEW: Create an SQS client and read the queue URL from env vars
 const sqs = new SQSClient({});
