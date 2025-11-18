@@ -19,9 +19,12 @@ jobs:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: eu-north-1
+        
+    - name: Remove conflicting package
+      run: sudo apt-get remove -y python3-zipstream || true
 
     - name: Install zip
-      run: sudo apt-get update && sudo apt-get install -y zip..
+      run: sudo apt-get update && sudo apt-get install -y zip python3-zipstream-ng
 
 # ---------- EnvironmentDataFunction_Iac ----------
     - name: Package environment lambda
