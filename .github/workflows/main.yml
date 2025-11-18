@@ -64,6 +64,3 @@ jobs:
           aws lambda update-function-code \
             --function-name SymptomConsumerFunction_Iac \
             --zip-file fileb://symptom-consumer.zip
-          aws lambda update-function-code \
-          --function-name SymptomConsumerLambda_Iac \
-          --zip-file fileb://symptom-consumer.zip
