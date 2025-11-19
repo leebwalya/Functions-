@@ -5,7 +5,7 @@ import { DynamoDBDocumentClient, GetCommand, PutCommand } from "@aws-sdk/lib-dyn
 // Create the DynamoDB document client (simpler than raw client)
 const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 
-// Name of the cache table (PK = cityKey string, stores 'data' and 'ttl')
+// Name of the cache table (PK = city string, stores 'data' and 'ttl')
 const CACHE_TABLE = "EnvCache_Iac";
 
 // async function that handles incoming API requests
@@ -141,7 +141,7 @@ export const handler = async (event) => {
       new PutCommand({
         TableName: CACHE_TABLE,
         Item: {
-          cityKey, // partition key
+          city, // partition key
           data,    // the payload we just built
           ttl,     // when DynamoDB should expire this item (TTL must be enabled in table with attribute name "ttl")
         },
