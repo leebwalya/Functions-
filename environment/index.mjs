@@ -49,7 +49,7 @@ export const handler = async (event) => {
     const cached = await ddb.send(
       new GetCommand({
         TableName: CACHE_TABLE,
-        Key: { cityKey }, // PK lookup
+        Key: { city }, // PK lookup
       })
     );
 
