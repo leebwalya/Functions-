@@ -1,11 +1,11 @@
-// Import DynamoDB clients for simple JSON reads/writes
+// Import DynamoDB clients 
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, GetCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
 
-// Create the DynamoDB document client (simpler than raw client)
+// Create the DynamoDB document client 
 const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 
-// Name of the cache table (PK = city string, stores 'data' and 'ttl')
+// Name of the cache table
 const CACHE_TABLE = "EnvCache_Iac";
 
 // async function that handles incoming API requests
@@ -38,10 +38,10 @@ export const handler = async (event) => {
       };
     }
 
-    // Build a normalized key for the cache (lowercase to de-dupe)
+    // Build a normalized key for the cache
     const cityKey = city.toLowerCase();
 
-    // --------- 1) CHECK CACHE FIRST (fast + cheap) ----------
+    //  1) CHECK CACHE FIRST
     // current epoch time in seconds
     const now = Math.floor(Date.now() / 1000);
 
@@ -53,7 +53,7 @@ export const handler = async (event) => {
       })
     );
 
-    // If we found an item AND its ttl is in the future, return cached data
+    // If found an item AND its ttl is in the future, return cached data
     if (cached.Item && typeof cached.Item.ttl === "number" && cached.Item.ttl > now) {
       // return the cached payload exactly as saved
       return {
@@ -63,7 +63,7 @@ export const handler = async (event) => {
       };
     }
 
-    // --------- 2) CACHE MISS ⇒ CALL LIVE APIS ----------
+    // 2) CACHE MISS - CALL LIVE APIS 
     // Get coordinates from OpenWeather geocoding
     const geoRes = await fetch(
       `http://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(
@@ -133,7 +133,7 @@ export const handler = async (event) => {
       fetchedAt: new Date().toISOString(),
     };
 
-    // --------- 3) WRITE BACK TO CACHE WITH TTL ----------
+    // 3) WRITE BACK TO CACHE WITH TTL 
     // set TTL for 24 hours from now (in seconds)
     const ttl = now + 24 * 60 * 60;
 
@@ -143,8 +143,7 @@ export const handler = async (event) => {
         Item: {
           city, // partition key
           data,    // the payload we just built
-          ttl,     // when DynamoDB should expire this item (TTL must be enabled in table with attribute name "ttl")
-        },
+          ttl,     // when DynamoDB should expire this item 
       })
     );
 
