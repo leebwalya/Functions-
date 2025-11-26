@@ -1,6 +1,6 @@
 // Import the DynamoDB client from AWS SDK
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-// Import helper functions to work with DynamoDB in a simpler way
+// Import helper functions 
 import {
   DynamoDBDocumentClient,
   QueryCommand,
@@ -8,7 +8,7 @@ import {
   DeleteCommand,
 } from "@aws-sdk/lib-dynamodb";
 
-// NEW: Import SQS client to send messages to the queue (asynchronous writes)
+//Import SQS client to send messages to the queue
 import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
 
 // Create a new DynamoDB client
@@ -18,7 +18,7 @@ const dynamo = DynamoDBDocumentClient.from(client);
 // Set the name of the table
 const tableName = process.env.SYMPTOM_TABLE;
 
-//  NEW: Create an SQS client and read the queue URL from env vars
+//  Create an SQS client and read the queue URL from env vars
 const sqs = new SQSClient({});
 const symptomLogQueueUrl = process.env.SYMPTOM_LOG_QUEUE_URL;
 
@@ -31,7 +31,7 @@ export const handler = async (event) => {
   let statusCode = 200;
   let body;
 
-  // Set headers to allow requests from any website (CORS)
+  // Set headers to allow requests from any website 
   const headers = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "OPTIONS,GET,POST,DELETE",
@@ -65,17 +65,16 @@ export const handler = async (event) => {
       case "POST": {
         const data = JSON.parse(event.body);
 
-        //  CHANGED: Instead of writing directly to DynamoDB here,
-        // we enqueue the payload to SQS for asynchronous, reliable processing.
+      
+        // enqueue the payload to SQS for asynchronous, reliable processing.
         // This protects the system under heavy concurrent loads.
         if (!symptomLogQueueUrl) {
           throw new Error("SYMPTOM_LOG_QUEUE_URL env var not set");
         }
 
-        // Keep your simple id approach for traceability
         const id = `id-${Date.now()}`;
 
-        // Build the message we will send to SQS (include userId, id, and original fields)
+        // Build the message to send to SQS
         const message = {
           UserId: userId,
           id,
@@ -91,7 +90,7 @@ export const handler = async (event) => {
           })
         );
 
-        // Return 202 to indicate it was accepted and queued (asynchronous processing)
+        // Return 202 to indicate it was accepted and queued
         statusCode = 202;
         // Set the response message
         body = { message: "Symptom entry queued", id };
